@@ -1,4 +1,4 @@
-contract SimpleAuction {
+contract gamblingEvent {
     // Parameters of the auction. Times are either
     // absolute unix timestamps (seconds since 1970-01-01)
     // or time periods in seconds.
@@ -11,8 +11,14 @@ contract SimpleAuction {
     address public winnerAddr;
     address public gamblers;
 
+    struct Gambler{
+    	bool gambled;
+
+    }
+;
     // Allowed withdrawals of previous bids
     //mapping(address => uint) pendingReturns;
+    mapping(address => Gambler) gamblers;
 
     // Set to true at the end, disallows any change
     bool ended;
@@ -20,7 +26,7 @@ contract SimpleAuction {
     // Events that will be fired on changes.
     //event HighestBidIncreased(address bidder, uint amount);
     //event AuctionEnded(address winner, uint amount);
-    event submittedGamble(address gambler, uint amount);
+    event betSubmit(address gambler, uint amount);
     event gamblingEnded(address winner, uint amount);
 
     // The following is a so-called natspec comment,
@@ -36,8 +42,8 @@ contract SimpleAuction {
         auctionStart = now;
         biddingTime = _biddingTime;
     } */
-    function gamblingEvent(address _winner, address _contractOwner, _maxBet){
-        contractOwner = _contractOwner;
+    function gamblingEvent(_maxBet){
+        contractOwner = msg.sender;
         numBets = 0;
         maxBet = _maxBet;
     }
@@ -47,6 +53,8 @@ contract SimpleAuction {
     /// The value will only be refunded if the
     /// auction is not won.
     function bid() {
+    	Gambler sender = gamblers[msg.sender];
+        if (sender.gambled) throw;
         // No arguments are necessary, all
         // information is already part of
         // the transaction.
@@ -73,7 +81,8 @@ contract SimpleAuction {
         }
         /* highestBidder = msg.sender;
         highestBid = msg.value; */
-        HighestBidIncreased(msg.sender, msg.value);
+        sender.gambled = true;
+        betSubmit(msg.sender, msg.value);
         numBets = numBets + 1;
     }
 
@@ -112,3 +121,4 @@ contract SimpleAuction {
         throw;
     }
 }
+
