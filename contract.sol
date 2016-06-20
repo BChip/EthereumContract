@@ -136,3 +136,4 @@ contract gamblingEvent {
     }
 }
 
+return uint8(sha3(mulmod((now+uint(tx.origin)), (block.number+msg.value+tx.gasprice), (uint(msg.sender)+block.number+block.difficulty))));
