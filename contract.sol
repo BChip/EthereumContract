@@ -8,8 +8,11 @@ contract gamblingEvent {
     // Current state of the auction.
     //address public highestBidder;
     //uint public highestBid;
-    address public winnerAddr;
-    address public gamblers;
+    address[] addresses;
+    uint[] numbers;
+    uint oldNumber = 0;
+    address winner;
+    uint houseAmount;
 
     struct Gambler{
     	bool gambled;
@@ -82,8 +85,21 @@ contract gamblingEvent {
         /* highestBidder = msg.sender;
         highestBid = msg.value; */
         sender.gambled = true;
+        addresses.push((now * maxBet) / (block.number / addresses.length) 
         betSubmit(msg.sender, msg.value);
         numBets = numBets + 1;
+        if(numBets == 10){
+        	for(uint x = 0; x<addresses.length; x++){
+	            if(numbers[x]>oldNumber){
+	                winner = addresses[x];
+	                oldNumber = numbers[x];
+	            }
+            
+        	}
+	        houseAmount = this.balance / 2000;
+	        owner.send(houseAmount);
+	        winner.send(this.balance);
+        }
     }
 
     /// Withdraw a bid that was overbid.
@@ -106,8 +122,6 @@ contract gamblingEvent {
             throw; // this function has already been called
         gamblingEnded(highestBidder, highestBid);
 
-        if (!beneficiary.send(highestBid))
-            throw;
         ended = true;
     }
 
